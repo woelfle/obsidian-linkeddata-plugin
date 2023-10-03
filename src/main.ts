@@ -1,5 +1,5 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, ItemView, WorkspaceLeaf } from 'obsidian';
-import { LinkedDataTripleView, TRIPLE_VIEW_NAME } from 'src/rdftripleview'
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { RDFTripleView, TRIPLE_VIEW_NAME } from 'src/rdftripleview'
 
 // Remember to rename these classes and interfaces!
 
@@ -19,7 +19,7 @@ export default class LinkedDataPlugin extends Plugin {
 
 		this.registerView(
 			TRIPLE_VIEW_NAME,
-			(leaf) => new LinkedDataTripleView(leaf)
+			(leaf) => new RDFTripleView(leaf)
 		);
 
 		// This creates an icon in the left ribbon to open the 'Triple View'.
