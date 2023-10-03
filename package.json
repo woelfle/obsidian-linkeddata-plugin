@@ -6,10 +6,16 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "node version-bump.mjs && git add manifest.json versions.json"
+		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"dist": "rm -rf dist && mkdir dist && npm run build && cp styles.css versions.json manifest.json dist/",
+		"release": "node version-bump.mjs",
+		"test": "jest --passWithNoTests"
 	},
-	"keywords": [],
-	"author": "",
+	"keywords": [
+		"obsidian",
+		"linked data"
+	],
+	"author": "Thomas Woelfle",
 	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^16.11.6",
