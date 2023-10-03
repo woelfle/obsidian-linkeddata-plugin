@@ -3,6 +3,7 @@
     "baseUrl": ".",
     "inlineSourceMap": true,
     "inlineSources": true,
+    "jsx": "preserve",
     "module": "ESNext",
     "target": "ES6",
     "allowJs": true,
@@ -18,7 +19,6 @@
       "ES7"
     ]
   },
-  "include": [
-    "**/*.ts"
-  ]
+  "include": ["src/*.ts", "src/*.tsx", "tests/*.ts"],
+  "exclude": ["node_modules/*"]
 }
