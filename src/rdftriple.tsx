@@ -1,5 +1,5 @@
-export function RDFTriple({ subject, predicate, object }: { subject: string, predicate: string, object: string }) {
+export function RDFTriple({ subject, predicate, object }: { subject: string | undefined, predicate: string | undefined, object: string | undefined }) {
     return (
-        <h4>{subject} {predicate} {object}</h4>
+        <h6>{subject} {predicate} {object}</h6>
     );
 }

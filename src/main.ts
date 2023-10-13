@@ -1,5 +1,7 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { RDFTripleView, TRIPLE_VIEW_NAME } from 'src/rdftripleview'
+import { InMemoryRepository } from 'src/repository/InMemoryRepository'
+import { LinkedData } from './LinkedData';
 
 // Remember to rename these classes and interfaces!
 
@@ -13,13 +15,17 @@ const DEFAULT_SETTINGS: LinkedDataPluginSettings = {
 
 export default class LinkedDataPlugin extends Plugin {
 	settings: LinkedDataPluginSettings;
+	linkedData: LinkedData;
 
 	async onload() {
 		await this.loadSettings();
 
+		const repository = new InMemoryRepository();
+		this.linkedData = new LinkedData(this.app, repository);
+
 		this.registerView(
 			TRIPLE_VIEW_NAME,
-			(leaf) => new RDFTripleView(leaf)
+			(leaf) => new RDFTripleView(leaf, this.linkedData)
 		);
 
 		// This creates an icon in the left ribbon to open the 'Triple View'.
@@ -37,38 +43,10 @@ export default class LinkedDataPlugin extends Plugin {
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
-			id: 'open-linkeddata-modal-simple',
-			name: 'Open LinkedData modal (simple)',
+			id: 'woelfle-linkeddata-update-repository',
+			name: 'Update Repository',
 			callback: () => {
-				new LinkedDataModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'linkeddata-editor-command',
-			name: 'LinkedData editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('LinkedData Editor Command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-linkeddata-modal-complex',
-			name: 'Open LinkedData modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new LinkedDataModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
+				this.linkedData.updateRepository();
 			}
 		});
 
@@ -80,6 +58,7 @@ export default class LinkedDataPlugin extends Plugin {
 		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
 			console.log('click', evt);
 		});
+
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
@@ -108,22 +87,6 @@ export default class LinkedDataPlugin extends Plugin {
 		this.app.workspace.revealLeaf(
 			this.app.workspace.getLeavesOfType(TRIPLE_VIEW_NAME)[0]
 		);
-	}
-}
-
-class LinkedDataModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
 	}
 }
 
