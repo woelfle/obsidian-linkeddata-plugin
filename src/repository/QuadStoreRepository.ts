@@ -12,6 +12,7 @@ import type {
     Bindings,
     ResultStream,
 } from '@rdfjs/types';
+import { REPOSITORY_UPDATED_EVENT } from "src/LinkedData";
 
 export class QuadStoreRepository implements IRepository {
     private dataFactory: DataFactory;
@@ -56,6 +57,7 @@ export class QuadStoreRepository implements IRepository {
                     },
                     eof(h_prefixes) {
                         console.log(`Done loading ${file.name}.`);
+                        dispatchEvent(new CustomEvent(REPOSITORY_UPDATED_EVENT));
                     }
                 });
             })
@@ -77,10 +79,5 @@ export class QuadStoreRepository implements IRepository {
     query(sparqlQuery: string): Promise<ResultStream<Bindings>> {
         console.log(`Executing query ${sparqlQuery}`);
         return this.engine.queryBindings(sparqlQuery);
-    }
-
-    private logQuads() {
-        const quadsStream = this.store.match(undefined, undefined, undefined, undefined);
-        quadsStream.on('data', quad => console.log(quad));
     }
 }
