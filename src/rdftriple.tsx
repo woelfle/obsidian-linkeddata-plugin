@@ -1,5 +1,7 @@
-export function RDFTriple({ subject, predicate, object }: { subject: string | undefined, predicate: string | undefined, object: string | undefined }) {
+import { Quad } from "@rdfjs/types";
+
+export function RDFTriple({ quad }: { quad: Quad }) {
     return (
-        <h6>{subject} {predicate} {object}</h6>
+        <h6>{quad.subject.value} {quad.predicate.value} {quad.object.value}</h6>
     );
 }

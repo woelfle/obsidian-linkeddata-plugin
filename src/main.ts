@@ -1,7 +1,8 @@
-import { App, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, MarkdownPostProcessorContext, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { RDFTripleView, TRIPLE_VIEW_NAME } from 'src/rdftripleview'
-import { InMemoryRepository } from 'src/repository/InMemoryRepository'
+import { QuadStoreRepository } from 'src/repository/QuadStoreRepository'
 import { LinkedData } from './LinkedData';
+import { SparqlMarkdownPostProcessor } from 'src/query/SparqlMarkdownPostProcessor';
 
 // Remember to rename these classes and interfaces!
 
@@ -18,10 +19,17 @@ export default class LinkedDataPlugin extends Plugin {
 	linkedData: LinkedData;
 
 	async onload() {
+		console.log("Loading LinkedData plugin")
 		await this.loadSettings();
 
-		const repository = new InMemoryRepository();
+		console.log("Initialize repository");
+		const repository = new QuadStoreRepository();
+		await repository.init();
 		this.linkedData = new LinkedData(this.app, repository);
+
+		const sparqlProcessor = new SparqlMarkdownPostProcessor(this.linkedData);
+
+		this.registerMarkdownCodeBlockProcessor("sparql", sparqlProcessor.processor());
 
 		this.registerView(
 			TRIPLE_VIEW_NAME,
@@ -37,10 +45,6 @@ export default class LinkedDataPlugin extends Plugin {
 		// Perform additional things with the ribbon
 		ribbonTripleIconEl.addClass('linkeddata-plugin-ribbon-class');
 
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
-
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
 			id: 'woelfle-linkeddata-update-repository',
@@ -53,15 +57,26 @@ export default class LinkedDataPlugin extends Plugin {
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new LinkedDataSettingTab(this.app, this));
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+	}
+
+	private processSparqlBlock(): (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => void | Promise<any> {
+		return (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
+			const rows = source.split("\n").filter((row) => row.length > 0);
+
+			const table = el.createEl("table");
+			const body = table.createEl("tbody");
+
+			for (let i = 0; i < rows.length; i++) {
+				const cols = rows[i].split(",");
+				const row = body.createEl("tr");
+
+				for (let j = 0; j < cols.length; j++) {
+					row.createEl("td", { text: cols[j] });
+				}
+			}
+		};
 	}
 
 	onunload() {
