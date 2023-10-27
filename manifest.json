@@ -1,6 +1,6 @@
 {
 	"id": "linkeddata-plugin",
-	"name": "LinkedData Plugin",
+	"name": "Linked Data",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "This is a plugin for Obsidian. This plugin adds LinkedData kapabilities to Obsidian.",
