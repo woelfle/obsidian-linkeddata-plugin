@@ -1,4 +1,5 @@
 import {  Plugin } from 'obsidian';
+import RDFLibRepository from 'src/repository/RDFLibRepository';
 import { ecmaScriptInfo } from "./helper";
 
 
@@ -25,6 +26,10 @@ export default class LinkedDataPlugin extends Plugin {
 		log(this, "Loading plugin")
     this.logEcmaVersion();
 		await this.loadSettings();
+
+    const repo = new RDFLibRepository();
+    repo.init();
+    repo.add();
 	}
 
 	onunload() {
