@@ -1,4 +1,6 @@
 import {  Plugin } from 'obsidian';
+import { ecmaScriptInfo } from "./helper";
+
 
 // Remember to rename these classes and interfaces!
 
@@ -10,34 +12,40 @@ const DEFAULT_SETTINGS: LinkedDataPluginSettings = {
 	mySetting: 'default'
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function log(cls: any, message: string): void {
+  const timestamp = new Date().toLocaleTimeString();
+  console.log(`[${timestamp}] (${cls.constructor.name}): ${message}`);
+}
+
 export default class LinkedDataPlugin extends Plugin {
 	settings: LinkedDataPluginSettings;
 
 	async onload() {
-		this.log("Loading plugin")
+		log(this, "Loading plugin")
+    this.logEcmaVersion();
 		await this.loadSettings();
 	}
 
 	onunload() {
-		this.log("Unloading plugin")
+		log(this, "Unloading plugin")
 	}
 
 	async loadSettings() {
-		this.log("Loading settings");
+		log(this, "Loading settings");
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 
 	async saveSettings() {
-		this.log("Save settings");
+		log(this, "Save settings");
 		await this.saveData(this.settings);
 	}
 
 	async activateView() {
-		this.log("Activate View");
+    log(this, "Activate View");
 	}
 
-	private log(message: string): void {
-		const timestamp = new Date().toLocaleTimeString();
-		console.log(`LinkedDataPlugin [${timestamp}]: ${message}`);
-	}
+  private logEcmaVersion() {
+    log(this, "ECMA Info: " + ecmaScriptInfo.text);
+  }
 }
