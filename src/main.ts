@@ -1,4 +1,4 @@
-import {  Plugin } from 'obsidian';
+import {  Plugin, TFile, TFolder } from 'obsidian';
 import RDFLibRepository from 'src/repository/RDFLibRepository';
 import { ecmaScriptInfo } from "./helper";
 
@@ -21,15 +21,17 @@ export function log(cls: any, message: string): void {
 
 export default class LinkedDataPlugin extends Plugin {
 	settings: LinkedDataPluginSettings;
+  repo: RDFLibRepository;
 
 	async onload() {
 		log(this, "Loading plugin")
     this.logEcmaVersion();
 		await this.loadSettings();
 
-    const repo = new RDFLibRepository();
-    repo.init();
-    repo.add();
+    this.repo = new RDFLibRepository();
+    this.repo.init();
+
+    this.populateOntologies();
 	}
 
 	onunload() {
@@ -52,5 +54,22 @@ export default class LinkedDataPlugin extends Plugin {
 
   private logEcmaVersion() {
     log(this, "ECMA Info: " + ecmaScriptInfo.text);
+  }
+
+  private populateOntologies() {
+    log(this, "Populating LinkedData repository with all ontologies found at 'admin/ontologies'");
+    const ontologiesFolder = this.app.vault.getAbstractFileByPath("admin/ontologies");
+    if (ontologiesFolder instanceof TFolder) {
+        const ontologies = ontologiesFolder.children;
+        ontologies.forEach(ontology => {
+            if (ontology instanceof TFile) {
+                this.populateOntology(ontology);
+            }
+        })
+    }
+  }
+
+  private populateOntology(file: TFile) {
+    this.repo.addOntology(file);
   }
 }

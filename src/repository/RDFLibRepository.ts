@@ -1,3 +1,4 @@
+import { TFile } from "obsidian";
 import { log } from "./../main";
 import { Store, parse } from "rdflib";
 
@@ -6,7 +7,7 @@ export default class RDFLibRepository {
 
   public init() {
     log(this, "Init Repository");
-
+    this.initStore();
   }
 
   private initStore() {
@@ -16,10 +17,22 @@ export default class RDFLibRepository {
     })
   }
 
-  public addGraph(stmts: string, graphUri: string): void {
-    parse(stmts, this.store, graphUri, 'text/turtle', cb => {
-      log(this, "Finished adding graph");
-    });
+  public addOntology(file: TFile) {
+    console.log(`Adding ontology from file ${file.name}`);
+    const store = this.store;
+    const graphUri = `obsidian://graph/ontology/${file.name}`
+
+    file.vault.read(file)
+        .then(data => {
+            log(this, `Loaded ontology file ${file.name} into store ${store}`);
+            parse(data, store, graphUri, 'text/turtle', cb => {
+              log(this, `Finished adding graph`);
+              log(this, `Store Size: ${store.length}`);
+            });
+        })
+        .catch(reason => {
+            log(this, `Unable to load ontoloty ${file.name} because ${reason}`);
+        });
   }
 }
 
