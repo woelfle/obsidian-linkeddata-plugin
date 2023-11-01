@@ -1,5 +1,5 @@
 import { TFile } from "obsidian";
-import { log } from "./../main";
+import { log } from "./../logging";
 import { Store, parse } from "rdflib";
 
 export default class RDFLibRepository {

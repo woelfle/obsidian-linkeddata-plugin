@@ -1,6 +1,7 @@
 import {  Plugin, TFile, TFolder } from 'obsidian';
 import RDFLibRepository from 'src/repository/RDFLibRepository';
 import { ecmaScriptInfo } from "./helper";
+import { log } from './logging';
 
 
 // Remember to rename these classes and interfaces!
@@ -11,12 +12,6 @@ interface LinkedDataPluginSettings {
 
 const DEFAULT_SETTINGS: LinkedDataPluginSettings = {
 	mySetting: 'default'
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function log(cls: any, message: string): void {
-  const timestamp = new Date().toLocaleTimeString();
-  console.log(`[${timestamp}] (${cls.constructor.name}): ${message}`);
 }
 
 export default class LinkedDataPlugin extends Plugin {
