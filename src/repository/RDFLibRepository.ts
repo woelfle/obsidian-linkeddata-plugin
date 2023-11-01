@@ -5,9 +5,10 @@ import { Store, parse } from "rdflib";
 export default class RDFLibRepository {
   private store: Store;
 
-  public init() {
+  public init(): boolean {
     log(this, "Init Repository");
     this.initStore();
+    return true;
   }
 
   private initStore() {
