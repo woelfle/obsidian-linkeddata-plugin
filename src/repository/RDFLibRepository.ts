@@ -1,12 +1,12 @@
-import { TFile } from "obsidian";
-import { log } from "./../logging";
+import TurtleFile from "./TurtleFile";
+import { info, debug, error } from "./../logging";
 import { Store, parse } from "rdflib";
 
 export default class RDFLibRepository {
   private store: Store;
 
   public init(): boolean {
-    log(this, "Init Repository");
+    info(this, "Init Repository");
     this.initStore();
     return true;
   }
@@ -14,26 +14,34 @@ export default class RDFLibRepository {
   private initStore() {
     this.store = new Store();
     this.store.addDataCallback(quad => {
-      log(this, "Added Quad")
+      debug(this, "Added Quad %s", quad.subject.value, quad.predicate.value, quad.object.value)
     })
   }
 
-  public addOntology(file: TFile) {
-    console.log(`Adding ontology from file ${file.name}`);
-    const store = this.store;
-    const graphUri = `obsidian://graph/ontology/${file.name}`
+  public addOntology(file: TurtleFile) {
+    if(!this.isValidFile(file)) return;
 
-    file.vault.read(file)
-        .then(data => {
-            log(this, `Loaded ontology file ${file.name} into store ${store}`);
-            parse(data, store, graphUri, 'text/turtle', cb => {
-              log(this, `Finished adding graph`);
-              log(this, `Store Size: ${store.length}`);
-            });
-        })
-        .catch(reason => {
-            log(this, `Unable to load ontoloty ${file.name} because ${reason}`);
+    info(this, `Adding ontology from file ${file.name()}`);
+    const store = this.store;
+    const graphUri = `obsidian://graph/ontology/${file.name()}`
+
+    file.toString()
+      .then(data => {
+        info(this, `Loaded ontology file ${file.name()} into store`);
+        parse(data, store, graphUri, 'text/turtle', cb => {
+          info(this, `Finished adding graph. New store Size is ${store.length}`);
         });
+      })
+      .catch(reason => {
+        error(this, `Unable to load ontoloty ${file.name()} because ${reason}`);
+      });
+  }
+
+  private isValidFile(file: TurtleFile) : boolean {
+    if(!file) {
+      error(this, 'Null object passed as file in "addOntology"');
+      return false;
+    }
+    return true;
   }
 }
-
